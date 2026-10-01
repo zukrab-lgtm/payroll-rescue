@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Payroll Rescue — Business Mathematics Session 03</title>
+<style>
+:root{
+  --bg:#0b1020;--panel:#131a2e;--panel2:#1b2540;--text:#f4f7ff;--muted:#aeb9d6;
+  --accent:#62d6ff;--accent2:#8cffb0;--warn:#ffd166;--danger:#ff7b8a;
+}
+*{box-sizing:border-box} body{margin:0;background:linear-gradient(135deg,#080c18,#101b35 55%,#0b1020);
+font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--text);min-height:100vh}
+.app{max-width:900px;margin:auto;padding:18px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+.brand{font-weight:800;letter-spacing:.5px}.badge{padding:7px 11px;border:1px solid #31405f;border-radius:999px;color:var(--accent);font-size:12px}
+.card{background:rgba(19,26,46,.96);border:1px solid #283653;border-radius:22px;padding:22px;box-shadow:0 18px 50px rgba(0,0,0,.25)}
+h1,h2,h3{margin:0 0 10px} h1{font-size:34px} h2{font-size:25px} h3{font-size:18px}
+p{line-height:1.55;color:#d8e0f4}.muted{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+.stat{background:var(--panel2);border-radius:15px;padding:14px}.stat b{display:block;font-size:24px}
+.btn{border:0;border-radius:13px;padding:13px 17px;font-weight:800;cursor:pointer;background:var(--accent);color:#07101b}
+.btn.secondary{background:#263452;color:#fff}.btn.success{background:var(--accent2);color:#07140c}.btn.warn{background:var(--warn);color:#251d00}
+.btn.danger{background:var(--danger);color:#25070b}.btn:disabled{opacity:.45;cursor:not-allowed}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+input,select{width:100%;padding:13px;border-radius:12px;border:1px solid #394968;background:#0e1629;color:#fff;font-size:16px}
+label{font-size:13px;color:var(--muted);display:block;margin:10px 0 6px}
+.mission{border-left:4px solid var(--accent);padding-left:15px;margin:16px 0}
+.choice{display:block;width:100%;text-align:left;margin:9px 0;padding:14px;border-radius:13px;border:1px solid #334260;background:#111a30;color:#fff;cursor:pointer}
+.choice:hover{border-color:var(--accent)} .choice.selected{border-color:var(--accent);background:#172a45}
+.choice.correct{border-color:var(--accent2);background:#123224}.choice.wrong{border-color:var(--danger);background:#351720}
+.feedback{margin-top:14px;padding:14px;border-radius:13px;background:#10192d;border:1px solid #30405e}
+.formula{font-family:Consolas,monospace;background:#0a1222;border:1px solid #2c3a57;padding:12px;border-radius:12px;color:#bdeaff;margin:10px 0}
+.progress{height:10px;background:#202c47;border-radius:999px;overflow:hidden;margin:10px 0 18px}.bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0}
+.small{font-size:12px}.hidden{display:none!important}
+table{width:100%;border-collapse:collapse;margin-top:12px}td,th{padding:9px;border-bottom:1px solid #2b3955;text-align:left;font-size:13px}
+.footer{margin-top:15px;color:#8290b2;font-size:12px;text-align:center}
+@media(max-width:650px){.app{padding:10px}.card{padding:16px;border-radius:17px}h1{font-size:28px}.grid{grid-template-columns:1fr}.top{align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top"><div class="brand">📊 PAYROLL RESCUE</div><div class="badge">BUSINESS MATHEMATICS • SESSION 03</div></div>
+
+  <section id="start" class="card">
+    <h1>Payroll Rescue</h1>
+    <p><b>Mission:</b> You are the junior payroll analyst. It is payday, and the payroll file must be verified before salaries are released.</p>
+    <p class="muted">Learn by calculating, checking evidence, making a decision, and verifying the result.</p>
+    <div class="grid">
+      <div class="stat"><span class="muted">Missions</span><b>10</b></div>
+      <div class="stat"><span class="muted">Focus</span><b>C2 → C3</b></div>
+      <div class="stat"><span class="muted">Target</span><b>80+</b></div>
+    </div>
+    <label>Student / NIM</label><input id="nim" placeholder="Enter NIM">
+    <label>Research ID (optional)</label><input id="rid" placeholder="e.g. PAY-01">
+    <div class="actions"><button class="btn" onclick="startGame()">START PAYROLL MISSION 🚀</button>
+    <button class="btn secondary" onclick="loadGame()">CONTINUE</button></div>
+    <p class="small muted">Your progress is stored in this browser. No external server is required.</p>
+  </section>
+
+  <section id="game" class="card hidden">
+    <div class="top">
+      <div><div class="muted small" id="missionLabel"></div><h2 id="title"></h2></div>
+      <div class="badge">Score: <span id="score">0</span></div>
+    </div>
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <div class="mission"><p id="story"></p></div>
+    <div id="content"></div>
+    <div id="feedback"></div>
+    <div class="actions">
+      <button id="checkBtn" class="btn success" onclick="checkAnswer()">CHECK ANSWER</button>
+      <button id="nextBtn" class="btn" onclick="nextMission()" disabled>NEXT MISSION →</button>
+      <button class="btn secondary" onclick="saveGame()">SAVE</button>
+    </div>
+  </section>
+
+  <section id="result" class="card hidden">
+    <h1>Payroll Cleared! 🎯</h1>
+    <p id="resultText"></p>
+    <div class="grid">
+      <div class="stat"><span class="muted">Final Score</span><b id="finalScore"></b></div>
+      <div class="stat"><span class="muted">Correct</span><b id="correctCount"></b></div>
+      <div class="stat"><span class="muted">Level</span><b id="level"></b></div>
+    </div>
+    <h3>Learning Trace</h3>
+    <table><thead><tr><th>#</th><th>Mission</th><th>Topic</th><th>Answer</th><th>Result</th></tr></thead>
+    <tbody id="trace"></tbody></table>
+    <div class="actions">
+      <button class="btn" onclick="downloadCSV()">DOWNLOAD LEARNING TRACE CSV</button>
+      <button class="btn secondary" onclick="newGame()">START NEW GAME</button>
+    </div>
+  </section>
+  <div class="footer">Payroll Rescue • Built for Business Mathematics • C2 Comprehension + C3 Application</div>
+</div>
+
+<script>
+const missions=[
+{
+ title:"Gross Earnings — Hourly Wage", topic:"Gross Earnings",
+ story:"A payroll card shows an employee worked 38 hours at $14.80/hour. Before any deduction, what is the gross earning?",
+ type:"mcq",
+ choices:["$520.80","$562.40","$592.00","$703.00"], answer:1,
+ explain:"Gross earnings = hours × hourly rate = 38 × $14.80 = $562.40."
+},
+{
+ title:"Overtime Alert — More Than 40 Hours", topic:"Overtime",
+ story:"An employee worked 44.75 hours at $10.30/hour. The lesson uses 1.5× the regular rate for hours above 40. What is total gross earnings?",
+ type:"mcq",
+ choices:["$412.00","$455.39","$485.39","$515.90"], answer:2,
+ explain:"Regular = 40×10.30 = $412.00. OT = 4.75×10.30×1.5 = $73.39. Total = $485.39."
+},
+{
+ title:"Overtime Premium Method", topic:"Overtime Premium",
+ story:"Holly works 40 regular hours + 12 overtime hours at $17.40/hour. Using the premium method, calculate gross earnings.",
+ type:"mcq",
+ choices:["$904.80","$1009.20","$1113.60","$1220.40"], answer:1,
+ explain:"52×$17.40 = $904.80 plus OT premium 12×($17.40×0.5) = $104.40. Gross = $1009.20."
+},
+{
+ title:"Pay Period Detective", topic:"Equivalent Earnings",
+ story:"Scott earns $546 weekly. What is his equivalent annual income using 52 weekly payments?",
+ type:"mcq",
+ choices:["$28,392","$32,760","$43,836","$44,400"], answer:0,
+ explain:"Annual income = $546 × 52 = $28,392."
+},
+{
+ title:"Piecework Factory", topic:"Piecework",
+ story:"A worker is paid $3.20 per completed unit and completes 145 units. What is the gross piecework earning?",
+ type:"mcq",
+ choices:["$435.00","$464.00","$478.40","$512.00"], answer:1,
+ explain:"Piecework earning = units × rate per unit = 145 × $3.20 = $464.00."
+},
+{
+ title:"Commission Challenge", topic:"Commissions",
+ story:"A sales employee receives a 6% commission on $8,500 of sales. What commission is earned?",
+ type:"mcq",
+ choices:["$51","$510","$850","$1,410"], answer:1,
+ explain:"Commission = sales × rate = $8,500 × 0.06 = $510."
+},
+{
+ title:"FICA + Medicare Check", topic:"Social Security & Medicare",
+ story:"A worker earns $890 gross. Use the lesson rates: Social Security 6.2% and Medicare 1.45%. What is the combined employee deduction?",
+ type:"mcq",
+ choices:["$55.18","$12.91","$68.09","$76.99"], answer:2,
+ explain:"Social Security = 890×6.2% = $55.18. Medicare = 890×1.45% = $12.91. Combined = $68.09."
+},
+{
+ title:"Federal Withholding — Wage Bracket", topic:"Income Tax Withholding",
+ story:"Using the lesson's wage-bracket example: a single employee earns $850 for one week. The table gives $66 withholding for the $845–$855 bracket. What should be withheld?",
+ type:"mcq",
+ choices:["$42","$55.18","$66","$85"], answer:2,
+ explain:"The lesson's wage-bracket table example gives $66 for $845–$855 under Single / Married Filing Separately."
+},
+{
+ title:"Federal Withholding — Percentage", topic:"Income Tax Withholding",
+ story:"Using the lesson's percentage-method example: married filing jointly, weekly gross $690. The table says $0 + 10% of excess over $533. What is withholding?",
+ type:"mcq",
+ choices:["$10.70","$15.70","$53.30","$69.00"], answer:1,
+ explain:"$0 + 10%×($690−$533) = $15.70."
+},
+{
+ title:"Final Payroll Decision", topic:"Net Pay",
+ story:"Kizzy has weekly gross pay of $890. From the lesson: FICA $55.18, Medicare $12.91, federal withholding $35.70, state withholding $8.90, union dues $25. What is net pay?",
+ type:"mcq",
+ choices:["$752.31","$780.00","$821.10","$854.30"], answer:0,
+ explain:"Total deductions = 55.18+12.91+35.70+8.90+25 = $137.69. Net pay = $890−$137.69 = $752.31."
+}
+];
+
+let state={i:0,score:0,correct:0,answers:[],nim:"",rid:"",checked:false};
+
+function startGame(){
+ state={i:0,score:0,correct:0,answers:[],nim:document.getElementById('nim').value.trim(),rid:document.getElementById('rid').value.trim(),checked:false};
+ if(!state.nim){alert("Please enter Student / NIM.");return}
+ localStorage.removeItem('payrollGame');
+ document.getElementById('start').classList.add('hidden');
+ document.getElementById('result').classList.add('hidden');
+ document.getElementById('game').classList.remove('hidden');
+ render();
+}
+function loadGame(){
+ const s=localStorage.getItem('payrollGame');
+ if(!s){alert("No saved game found in this browser.");return}
+ state=JSON.parse(s);
+ document.getElementById('start').classList.add('hidden');
+ document.getElementById('result').classList.add('hidden');
+ document.getElementById('game').classList.remove('hidden');
+ render();
+}
+function saveGame(){localStorage.setItem('payrollGame',JSON.stringify(state)); alert("Game saved. You can continue later.");}
+function render(){
+ const m=missions[state.i];
+ document.getElementById('missionLabel').textContent=`MISSION ${state.i+1} / ${missions.length} • ${m.topic}`;
+ document.getElementById('title').textContent=m.title;
+ document.getElementById('story').textContent=m.story;
+ document.getElementById('score').textContent=state.score;
+ document.getElementById('bar').style.width=((state.i)/missions.length*100)+"%";
+ document.getElementById('feedback').innerHTML="";
+ document.getElementById('nextBtn').disabled=true;
+ document.getElementById('checkBtn').disabled=false;
+ state.checked=false;
+ let html="";
+ m.choices.forEach((c,j)=>html+=`<button class="choice" id="c${j}" onclick="choose(${j})">${String.fromCharCode(65+j)}. ${c}</button>`);
+ html+=`<div class="formula"><b>Reasoning cue:</b> Observe the data → choose the correct formula → calculate → verify the business result.</div>`;
+ document.getElementById('content').innerHTML=html;
+}
+function choose(j){
+ if(state.checked)return;
+ [...document.querySelectorAll('.choice')].forEach(x=>x.classList.remove('selected'));
+ document.getElementById('c'+j).classList.add('selected');
+ state.choice=j;
+}
+function checkAnswer(){
+ if(state.choice===undefined){alert("Choose an answer first.");return}
+ const m=missions[state.i];
+ state.checked=true;
+ const ok=state.choice===m.answer;
+ if(ok){state.score+=10;state.correct++;}
+ document.getElementById('c'+state.choice).classList.add(ok?'correct':'wrong');
+ document.getElementById('c'+m.answer).classList.add('correct');
+ document.getElementById('feedback').innerHTML=`<div class="feedback"><b>${ok?"✅ Correct!":"❌ Not quite."}</b><br>${m.explain}</div>`;
+ state.answers.push({mission:state.i+1,topic:m.topic,answer:m.choices[state.choice],correct:ok});
+ document.getElementById('score').textContent=state.score;
+ document.getElementById('checkBtn').disabled=true;
+ document.getElementById('nextBtn').disabled=false;
+ saveSilent();
+}
+function nextMission(){
+ if(state.i<missions.length-1){state.i++;delete state.choice;render();}
+ else showResult();
+}
+function showResult(){
+ document.getElementById('game').classList.add('hidden');
+ document.getElementById('result').classList.remove('hidden');
+ document.getElementById('finalScore').textContent=state.score+"/100";
+ document.getElementById('correctCount').textContent=state.correct+"/10";
+ document.getElementById('level').textContent=state.score>=80?"PAYROLL ANALYST":"KEEP PRACTICING";
+ document.getElementById('resultText').textContent=
+ `Student ${state.nim}: You completed the Payroll Rescue simulation. Your score measures application across gross earnings, overtime, piecework/commission, withholding, and net pay.`;
+ document.getElementById('trace').innerHTML=state.answers.map((a,k)=>`<tr><td>${k+1}</td><td>Mission ${a.mission}</td><td>${a.topic}</td><td>${a.answer}</td><td>${a.correct?"Correct":"Review"}</td></tr>`).join("");
+ localStorage.removeItem('payrollGame');
+}
+function newGame(){
+ document.getElementById('result').classList.add('hidden');
+ document.getElementById('start').classList.remove('hidden');
+ document.getElementById('nim').value=state.nim||"";
+ document.getElementById('rid').value="";
+}
+function saveSilent(){localStorage.setItem('payrollGame',JSON.stringify(state));}
+function downloadCSV(){
+ const rows=[["Research ID","NIM","Mission","Topic","Selected Answer","Result"]];
+ state.answers.forEach(a=>rows.push([state.rid,state.nim,a.mission,a.topic,a.answer,a.correct?"Correct":"Review"]));
+ const csv=rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(",")).join("\n");
+ const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
+ const url=URL.createObjectURL(blob); const a=document.createElement('a');
+ a.href=url;a.download=`Payroll_Learning_Trace_${state.nim}.csv`;a.click();URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
